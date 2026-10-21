@@ -39,7 +39,7 @@ export function toTurns(messages: Message[]): ChatTurn[] {
 
 function replyText(message: Message) {
   const card = message.booking
-    ? `\n\n[A booking request card was shown: ${message.booking.apartmentName}, ${message.booking.checkIn} to ${message.booking.checkOut}, ${message.booking.guests} guests, total €${message.booking.price.total}.]`
+    ? `\n\n[A booking request card was shown: ${message.booking.propertyName}, ${message.booking.checkIn} to ${message.booking.checkOut}, ${message.booking.guests} guests, total €${message.booking.price.total}.]`
     : "";
   return (message.text.trim() + card).trim();
 }

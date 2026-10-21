@@ -15,7 +15,6 @@ export function BookingCard({ request }: { request: BookingRequest }) {
   const rows: [string, number][] = [
     [`${price.nights} nights`, price.accommodation],
     ["Cleaning", price.cleaningFee],
-    ...(price.petFee ? [["Dog", price.petFee] as [string, number]] : []),
     ["Tourist tax", price.touristTax],
   ];
 
@@ -36,11 +35,10 @@ export function BookingCard({ request }: { request: BookingRequest }) {
         <p className="text-xs text-ink-soft">Not booked until the host confirms</p>
       </div>
       <div className="px-4 py-3.5">
-        <h3 className="font-display text-lg leading-tight">{request.apartmentName}</h3>
+        <h3 className="font-display text-lg leading-tight">{request.propertyName}</h3>
         <p className="mt-1 text-sm text-ink-soft">
           {day(request.checkIn, false)} to {day(request.checkOut)} · {request.guests} {request.guests === 1 ? "guest" : "guests"}
           {request.childrenUnder12 > 0 && ` (${request.childrenUnder12} under 12)`}
-          {request.pet && " · with a dog"}
         </p>
         <dl className="tabular mt-3 space-y-1 text-sm">
           {rows.map(([name, value]) => (

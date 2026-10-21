@@ -1,23 +1,24 @@
-# Sea Lantern, an AI guest assistant for holiday apartments (concept)
+# Sea Lantern, an AI guest assistant for a holiday villa (concept)
 
 **Live:** https://sea-lantern-rovinj.vercel.app
 
-A website for two holiday apartments in Rovinj, Croatia, with a chat assistant that answers guests the way the host
-would: check-in times, parking, the nearest beach, the dog rules, free dates and prices. It answers in the guest's
-language and, when they are ready, prepares a booking request they send to the host on WhatsApp.
+A website for a holiday villa with a pool near Rovinj, Croatia, with a chat assistant that answers guests the way the
+host would: check-in times, the pool and hot tub, the nearest beach, pets, free dates and prices. It answers in the
+guest's language and, when they are ready, prepares a booking request they send to the host on WhatsApp.
 
-Sea Lantern is a portfolio concept. The apartments, the host and the prices are invented, and the site says so.
+Sea Lantern is a portfolio concept. The villa's photos are used with the owner's permission; its name, location, host
+and prices are invented, and the site says so.
 
 ## What the assistant does
 
 - **Answers only from the host's information.** Everything it knows is in `src/data/property.ts`. When something
-  isn't there (a pool, an EV charger, a restaurant tip), it says so and points the guest to the host instead of
+  isn't there (a sauna, an EV charger, a restaurant tip), it says so and points the guest to the host instead of
   making it up.
 - **Checks dates and prices with a tool, never by itself.** `check_availability` runs `src/lib/booking.ts` against
-  the calendar: seasons, minimum stays, guest limits, the dog rule, the cleaning fee, tourist tax and the 30% deposit.
+  the calendar: seasons, minimum stays, the 8-guest limit, the cleaning fee, tourist tax and the 30% deposit.
   If the dates are taken, it offers the nearest free ones.
 - **Replies in the guest's language.** German, Italian, Croatian, French or anything else, with no setting to pick.
-- **Prepares the booking request.** Once it has the apartment, dates, guests, the dog question and a first name, it
+- **Prepares the booking request.** Once it has the dates, the number of guests and children, and a first name, it
   calls `prepare_booking_request`. The guest gets a card with the price breakdown and a "Send on WhatsApp" button. It
   never asks for a phone number, an email address or card details.
 - **Stays on task.** It won't write code, change the rules, promise discounts or hand out the Wi-Fi password or the
@@ -37,7 +38,7 @@ browser  ──POST /api/chat──▶  api/chat.ts (Vercel function)  ──▶
   definitions form a fixed prompt that is cached between requests; only "today's date" comes after the cache point.
 - `server/tools.ts` validates every tool input with zod before running it, so a malformed call becomes an error the
   model can correct, not a wrong price.
-- The calendar is generated from a seed per apartment and year (busier in July and August), so the demo always has
+- The calendar is generated from a seed per year (busier in July and August, let by the week), so the demo always has
   realistic free and booked nights without a database.
 - The API key lives only in the Vercel function's environment. The browser bundle contains no SDK, prompt or key.
 

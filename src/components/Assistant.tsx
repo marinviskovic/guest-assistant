@@ -36,8 +36,8 @@ function save(messages: Message[]) {
 function suggestions(now = new Date()) {
   const year = now.getMonth() >= 6 ? now.getFullYear() + 1 : now.getFullYear();
   return [
-    "Is parking included?",
-    `Is Apartment Mare free 10 to 17 July ${year} for 4 of us?`,
+    "Is the pool heated?",
+    `Is the villa free 6 to 13 July ${year} for 8 of us?`,
     "Can we bring our dog?",
     "Wann ist der Check-in?",
     "Koliko je daleko plaža?",
@@ -180,7 +180,7 @@ export function Assistant() {
 
       <div ref={listRef} className="flex-1 space-y-4 overflow-y-auto overscroll-contain px-4 py-5 sm:px-5" data-testid="messages">
         <div className="max-w-[88%] rounded-2xl rounded-tl-md bg-limestone px-4 py-3 text-[15px] leading-relaxed">
-          Hi! I'm the guest assistant for Sea Lantern Apartments. Ask me about check-in, parking, the beach or free dates, in any
+          Hi! I'm the guest assistant for Sea Lantern Villa. Ask me about check-in, the pool, the beach or free dates, in any
           language. When you're ready, I'll prepare your booking request for the host.
         </div>
 

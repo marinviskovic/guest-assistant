@@ -1,12 +1,21 @@
-import { ArrowDown, BedDouble, CalendarCheck, Languages, MessageCircle, ShieldCheck, Users } from "lucide-react";
-import { APARTMENTS, HOUSE_INFO, RULES, SEASON_LABELS, type Season } from "./data/property";
+import { ArrowDown, Bath, BedDouble, CalendarCheck, Languages, MessageCircle, ShieldCheck, Users, Waves } from "lucide-react";
+import { HOUSE_INFO, RULES, SEASON_LABELS, VILLA, type Season } from "./data/property";
+import { GALLERY, HERO_PHOTO } from "./data/photos";
 import { Assistant, askAssistant } from "./components/Assistant";
-import { FloorPlan } from "./components/FloorPlan";
-import { Illustration } from "./components/Illustration";
 import { LanternMark } from "./components/LanternMark";
 
 const SEASONS = Object.keys(SEASON_LABELS) as Season[];
 const REPO = "https://github.com/marinviskovic/guest-assistant";
+
+const FACTS = [
+  { icon: Users, text: `Up to ${VILLA.maxGuests} guests` },
+  { icon: BedDouble, text: `${VILLA.bedrooms} bedrooms` },
+  { icon: Bath, text: `${VILLA.bathrooms} bathrooms` },
+  { icon: Waves, text: "Private pool" },
+];
+
+// The first photo is the large one; the rest fill the grid beside it.
+const TILE = ["col-span-2 row-span-2", "col-span-2", "", ""];
 
 const FEATURES = [
   { icon: ShieldCheck, title: "Answers from the house rules", text: "It only uses the host's own information. When something isn't there, it says so and points to the host." },
@@ -28,7 +37,7 @@ export default function App() {
           <span className="font-display text-xl font-semibold tracking-tight">Sea Lantern</span>
         </a>
         <nav aria-label="Main" className="flex items-center gap-1 text-sm">
-          <a href="#apartments" className="hidden rounded-full px-3 py-2 text-ink-soft hover:text-ink sm:inline-block">Apartments</a>
+          <a href="#villa" className="hidden rounded-full px-3 py-2 text-ink-soft hover:text-ink sm:inline-block">The villa</a>
           <a href="#info" className="hidden rounded-full px-3 py-2 text-ink-soft hover:text-ink sm:inline-block">Good to know</a>
           <a href="#ask" className="rounded-full bg-sea-deep px-4 py-2 font-medium text-limestone hover:bg-sea">Ask a question</a>
         </nav>
@@ -39,13 +48,13 @@ export default function App() {
           <div>
             <p className="inline-flex items-center gap-2 rounded-full border border-line bg-paper px-3 py-1 text-xs font-medium tracking-[0.06em] text-ink-soft uppercase">
               <span className="size-1.5 rounded-full bg-lantern" aria-hidden="true" />
-              Concept · Rovinj, Istria
+              Concept · near Rovinj, Istria
             </p>
             <h1 className="mt-5 text-[2.6rem] leading-[1.04] text-sea-deep sm:text-6xl">
-              Two apartments by the sea, and answers at any hour.
+              A villa with a pool above the sea, and answers at any hour.
             </h1>
             <p className="mt-5 max-w-xl text-lg leading-relaxed text-ink-soft">
-              Ask about parking, check-in or free dates in July. The guest assistant answers in your language from the host's
+              Ask about the pool, check-in or a free week in July. The guest assistant answers in your language from the host's
               own house rules, checks the calendar and prepares your booking request.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
@@ -53,12 +62,24 @@ export default function App() {
                 Ask the assistant
                 <ArrowDown className="size-4" aria-hidden="true" />
               </a>
-              <a href="#apartments" className="inline-flex min-h-12 items-center rounded-full border border-sea/30 px-6 font-medium text-sea hover:border-sea">
-                See the apartments
+              <a href="#villa" className="inline-flex min-h-12 items-center rounded-full border border-sea/30 px-6 font-medium text-sea hover:border-sea">
+                See the villa
               </a>
             </div>
           </div>
-          <Illustration className="h-auto w-full drop-shadow-[0_30px_40px_rgba(15,47,60,0.25)]" />
+          <figure className="relative">
+            <img
+              src={HERO_PHOTO.src}
+              alt={HERO_PHOTO.alt}
+              width={HERO_PHOTO.width}
+              height={HERO_PHOTO.height}
+              fetchPriority="high"
+              className="aspect-[4/3] w-full rounded-[28px] object-cover shadow-[0_30px_60px_-25px_rgba(15,47,60,0.55)]"
+            />
+            <figcaption className="absolute bottom-4 left-4 rounded-full bg-paper/90 px-3.5 py-1.5 text-sm font-medium text-sea-deep backdrop-blur">
+              Heated hot tub with a sea view
+            </figcaption>
+          </figure>
         </section>
 
         <section id="ask" className="scroll-mt-4 bg-sea-deep py-14 text-limestone md:py-20">
@@ -90,75 +111,93 @@ export default function App() {
           </div>
         </section>
 
-        <section id="apartments" className="mx-auto max-w-6xl scroll-mt-4 px-4 py-16 sm:px-6 md:py-24">
-          <h2 className="text-4xl text-sea-deep sm:text-5xl">The apartments</h2>
-          <p className="mt-3 max-w-2xl text-lg text-ink-soft">
-            Both are a short walk from the old town, with air conditioning, free parking and linen included.
-          </p>
-          <div className="mt-10 grid gap-6 md:grid-cols-2">
-            {Object.values(APARTMENTS).map((apartment) => (
-              <article key={apartment.id} className="flex flex-col rounded-[28px] border border-line bg-paper p-5 sm:p-7">
-                <div className="rounded-2xl bg-limestone p-4 text-sea">
-                  <FloorPlan apartment={apartment.id} />
-                </div>
-                <div className="mt-5 flex items-baseline justify-between gap-4">
-                  <h3 className="text-2xl text-sea-deep">{apartment.name}</h3>
-                  <p className="tabular shrink-0 text-sm text-ink-soft">
-                    from <span className="text-lg font-semibold text-ink">€{apartment.rates.low}</span> / night
-                  </p>
-                </div>
-                <p className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm text-ink-soft">
-                  <span className="inline-flex items-center gap-1.5"><Users className="size-4" aria-hidden="true" />Up to {apartment.maxGuests} guests</span>
-                  <span className="inline-flex items-center gap-1.5"><BedDouble className="size-4" aria-hidden="true" />{apartment.sizeM2} m²</span>
-                </p>
-                <ul className="mt-4 flex-1 space-y-1.5 text-[15px] leading-relaxed">
-                  {[apartment.beds, apartment.outdoor, apartment.kitchen, apartment.floor, apartment.petsAllowed ? "One dog welcome" : "No pets"].map((item) => (
-                    <li key={item} className="flex gap-2.5">
-                      <span className="mt-2.5 size-1 shrink-0 rounded-full bg-lantern" aria-hidden="true" />
-                      <span className="first-letter:uppercase">{item}</span>
-                    </li>
-                  ))}
-                </ul>
-                <button
-                  type="button"
-                  onClick={() => askAssistant(`Is ${apartment.name} free from `)}
-                  className="mt-6 inline-flex min-h-11 items-center justify-center gap-2 self-start rounded-full border border-sea/30 px-5 text-sm font-medium text-sea hover:border-sea"
-                >
-                  <CalendarCheck className="size-4" aria-hidden="true" />
-                  Ask about dates
-                </button>
-              </article>
+        <section id="villa" className="mx-auto max-w-6xl scroll-mt-4 px-4 py-16 sm:px-6 md:py-24">
+          <div className="flex flex-wrap items-end justify-between gap-x-10 gap-y-4">
+            <div>
+              <h2 className="text-4xl text-sea-deep sm:text-5xl">The villa</h2>
+              <p className="mt-3 max-w-2xl text-lg text-ink-soft">
+                The whole house is yours: a pool, a garden above the sea and a path down to a pebble cove, 3 km from Rovinj old
+                town.
+              </p>
+            </div>
+            <ul className="flex flex-wrap gap-2 text-sm">
+              {FACTS.map(({ icon: Icon, text }) => (
+                <li key={text} className="inline-flex items-center gap-1.5 rounded-full border border-line bg-paper px-3 py-1.5">
+                  <Icon className="size-4 text-sea" aria-hidden="true" />
+                  {text}
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="mt-10 grid auto-rows-[9rem] grid-cols-2 gap-3 sm:auto-rows-[11rem] md:grid-cols-4">
+            {GALLERY.map((photo, i) => (
+              <img
+                key={photo.src}
+                src={photo.src}
+                alt={photo.alt}
+                width={photo.width}
+                height={photo.height}
+                loading="lazy"
+                decoding="async"
+                className={`h-full w-full rounded-2xl object-cover ${TILE[i] ?? ""}`}
+              />
             ))}
           </div>
 
-          <div className="mt-10 overflow-x-auto rounded-[28px] border border-line bg-paper">
-            <table className="tabular w-full min-w-[520px] text-left text-[15px]">
-              <caption className="px-6 pt-5 text-left font-display text-xl font-semibold text-sea-deep">Prices per night</caption>
+          <div className="mt-10 grid gap-8 md:grid-cols-2">
+            {[
+              { title: "Rooms", items: VILLA.rooms },
+              { title: "What guests love", items: VILLA.highlights },
+            ].map((list) => (
+              <div key={list.title}>
+                <h3 className="text-2xl text-sea-deep">{list.title}</h3>
+                <ul className="mt-3 space-y-1.5 text-[15px] leading-relaxed">
+                  {list.items.map((item) => (
+                    <li key={item} className="flex gap-2.5">
+                      <span className="mt-2.5 size-1 shrink-0 rounded-full bg-lantern" aria-hidden="true" />
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-10 overflow-hidden rounded-[28px] border border-line bg-paper">
+            <table className="tabular w-full text-left text-[15px]">
+              <caption className="px-4 pt-5 text-left sm:px-6 font-display text-xl font-semibold text-sea-deep">Prices for the whole villa</caption>
               <thead>
                 <tr className="border-b border-line text-sm text-ink-soft">
-                  <th scope="col" className="px-6 py-3 font-medium">Season</th>
-                  {Object.values(APARTMENTS).map((apartment) => (
-                    <th key={apartment.id} scope="col" className="px-6 py-3 font-medium">{apartment.name}</th>
-                  ))}
-                  <th scope="col" className="px-6 py-3 font-medium">Minimum stay</th>
+                  <th scope="col" className="px-4 py-3 sm:px-6 font-medium">Season</th>
+                  <th scope="col" className="px-4 py-3 sm:px-6 font-medium">Per night</th>
+                  <th scope="col" className="px-4 py-3 sm:px-6 font-medium">Minimum stay</th>
                 </tr>
               </thead>
               <tbody>
                 {SEASONS.map((season) => (
                   <tr key={season} className="border-b border-line last:border-0">
-                    <th scope="row" className="px-6 py-3 font-normal">{SEASON_LABELS[season]}</th>
-                    {Object.values(APARTMENTS).map((apartment) => (
-                      <td key={apartment.id} className="px-6 py-3">€{apartment.rates[season]}</td>
-                    ))}
-                    <td className="px-6 py-3">{RULES.minNights[season]} nights</td>
+                    <th scope="row" className="px-4 py-3 sm:px-6 font-normal">{SEASON_LABELS[season]}</th>
+                    <td className="px-4 py-3 sm:px-6">€{VILLA.rates[season]}</td>
+                    <td className="px-4 py-3 sm:px-6">{RULES.minNights[season]} nights</td>
                   </tr>
                 ))}
               </tbody>
             </table>
-            <p className="border-t border-line px-6 py-4 text-sm text-ink-soft">
-              Plus a cleaning fee of €{APARTMENTS.studio.cleaningFee} or €{APARTMENTS.mare.cleaningFee} per stay and tourist tax of €
-              {RULES.touristTaxPerNight} per night for guests aged 12 and over. Closed from November to March.
-            </p>
+            <div className="flex flex-wrap items-center justify-between gap-4 border-t border-line px-4 py-4 sm:px-6">
+              <p className="max-w-2xl text-sm text-ink-soft">
+                Plus a cleaning fee of €{VILLA.cleaningFee} per stay and tourist tax of €{RULES.touristTaxPerNight} per night for
+                guests aged 12 and over. Closed from November to March.
+              </p>
+              <button
+                type="button"
+                onClick={() => askAssistant("Is the villa free from ")}
+                className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full border border-sea/30 px-5 text-sm font-medium text-sea hover:border-sea"
+              >
+                <CalendarCheck className="size-4" aria-hidden="true" />
+                Ask about dates
+              </button>
+            </div>
           </div>
         </section>
 
@@ -185,7 +224,8 @@ export default function App() {
       <footer className="bg-sea-deep text-limestone/80">
         <div className="mx-auto flex max-w-6xl flex-col gap-4 px-4 py-10 text-sm sm:px-6 md:flex-row md:items-center md:justify-between">
           <p className="max-w-xl leading-relaxed">
-            Concept website for a portfolio. Sea Lantern Apartments and the host are fictional, and booking requests aren't sent to anyone.
+            Concept website for a portfolio. Photos are used with the owner's permission. The villa's name, location, prices and
+            host are fictional, and booking requests aren't sent to anyone.
           </p>
           <p className="flex flex-wrap gap-x-5 gap-y-2">
             <span>Made by Webradiona</span>

@@ -36,16 +36,16 @@ async function events(response: Response): Promise<ChatEvent[]> {
 const textOf = (list: ChatEvent[]) => list.map((event) => (event.type === "text" ? event.text : "")).join("");
 
 test("a plain question streams text and ends with done", async () => {
-  const response = await ask([{ role: "user", content: "Is parking included?" }]);
+  const response = await ask([{ role: "user", content: "Is the pool heated?" }]);
   assert.equal(response.status, 200);
   assert.match(response.headers.get("content-type")!, /ndjson/);
   const list = await events(response);
-  assert.match(textOf(list), /free reserved parking space/);
+  assert.match(textOf(list), /hot tub in the garden is heated/);
   assert.equal(list.at(-1)!.type, "done");
 });
 
 test("the API request uses the cached prompt, low effort and server-side fallback", async () => {
-  await events(await ask([{ role: "user", content: "Is parking included?" }]));
+  await events(await ask([{ role: "user", content: "Is the pool heated?" }]));
   const { headers, body } = requests.at(-1);
   assert.match(headers["anthropic-beta"], /server-side-fallback-2026-07-01/);
   assert.equal(body.fallbacks, "default");
@@ -58,14 +58,14 @@ test("the API request uses the cached prompt, low effort and server-side fallbac
 });
 
 test("a dates question runs the calendar tool and answers with its price", async () => {
-  const list = await events(await ask([{ role: "user", content: "Is Mare free in June for 4?" }]));
+  const list = await events(await ask([{ role: "user", content: "Is the villa free in June for 6?" }]));
   assert.deepEqual(list.filter((event) => event.type === "tool_start").map((event) => (event as { name: string }).name), ["check_availability"]);
   // Text written before the tool call comes first, so the widget can replace it when the tool starts.
   assert.ok(list.findIndex((event) => event.type === "text") < list.findIndex((event) => event.type === "tool_start"));
   const done = list.find((event) => event.type === "tool_done") as Extract<ChatEvent, { type: "tool_done" }>;
-  const output = done.output as { results: { available: boolean; price: { total: number } }[] };
-  assert.equal(output.results[0].available, true);
-  assert.match(textOf(list), new RegExp(`€${output.results[0].price.total.toFixed(2)}`));
+  const output = done.output as { available: boolean; price: { total: number } };
+  assert.equal(output.available, true);
+  assert.match(textOf(list), new RegExp(`€${output.price.total.toFixed(2)}`));
   // The second API call carried the tool result back.
   const followUp = requests.at(-1).body.messages.at(-1).content[0];
   assert.equal(followUp.type, "tool_result");
@@ -76,7 +76,7 @@ test("a booking request produces a card with a WhatsApp message", async () => {
   const booking = list.find((event) => event.type === "booking") as Extract<ChatEvent, { type: "booking" }>;
   assert.ok(booking, "booking event");
   assert.equal(booking.request.guestName, "Ana");
-  assert.match(booking.request.message, /^Booking request: Sea Lantern Apartments\nApartment Mare, /);
+  assert.match(booking.request.message, /^Booking request: Sea Lantern Villa\n\d+ Jun 2027 to \d+ Jun 2027 \(5 nights\)\nGuests: 6\n/);
   assert.match(booking.request.message, /Note: Arriving around 18:00/);
   assert.match(textOf(list), /request is ready/);
 });
@@ -105,8 +105,8 @@ test("bad requests are turned away before reaching the model", async () => {
 
 test("too many messages from one visitor are rate limited", async () => {
   const headers = { "x-forwarded-for": "192.0.2.7" };
-  for (let i = 0; i < 30; i++) await (await ask([{ role: "user", content: "Is parking included?" }], headers)).text();
-  assert.equal((await ask([{ role: "user", content: "Is parking included?" }], headers)).status, 429);
+  for (let i = 0; i < 30; i++) await (await ask([{ role: "user", content: "Is the pool heated?" }], headers)).text();
+  assert.equal((await ask([{ role: "user", content: "Is the pool heated?" }], headers)).status, 429);
 });
 
 test("without an API key the chat says it is offline", async () => {

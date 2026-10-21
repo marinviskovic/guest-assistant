@@ -48,12 +48,12 @@ function message(blocks, stopReason) {
 
 const euro = (value) => `€${value.toFixed(2)}`;
 
-/** A Mare stay that really is free in the generated calendar, so the scripted booking goes through. */
-function freeMareStay() {
+/** A June stay that really is free in the generated calendar, so the scripted booking goes through. */
+function freeJuneStay() {
   for (let day = 1; day <= 25; day++) {
     const checkIn = `2027-06-${String(day).padStart(2, "0")}`;
-    const checkOut = `2027-06-${String(day + 4).padStart(2, "0")}`;
-    const query = { apartment: "mare", checkIn, checkOut, guests: 4, childrenUnder12: 0, pet: false };
+    const checkOut = `2027-06-${String(day + 5).padStart(2, "0")}`;
+    const query = { checkIn, checkOut, guests: 6, childrenUnder12: 0 };
     if (checkStay(query, "2026-10-21").available) return { check_in: checkIn, check_out: checkOut };
   }
   throw new Error("no free stay in June 2027");
@@ -67,15 +67,14 @@ function reply(body) {
     if (output.ready) {
       return message([{ type: "text", text: `Your request is ready below. The total is ${euro(output.total)} with a ${euro(output.deposit)} deposit. Tap the WhatsApp button to send it to the host.` }], "end_turn");
     }
-    const [result] = output.results;
-    const text = result.available
-      ? `Good news: ${result.name} is free from ${result.check_in} to ${result.check_out}.\n\n- Total: ${euro(result.price.total)}\n- Deposit: ${euro(result.price.deposit)}\n\nWould you like me to prepare a booking request?`
-      : `${result.name} isn't free then. ${result.problems.join(" ")}`;
+    const text = output.available
+      ? `Good news: the villa is free from ${output.check_in} to ${output.check_out}.\n\n- Total: ${euro(output.price.total)}\n- Deposit: ${euro(output.price.deposit)}\n\nWould you like me to prepare a booking request?`
+      : `The villa isn't free then. ${output.problems.join(" ")}`;
     return message([{ type: "text", text }], "end_turn");
   }
 
   const question = typeof last.content === "string" ? last.content : "";
-  const stayInput = { apartment: "mare", ...freeMareStay(), guests: 4, children_under_12: 0, pet: false };
+  const stayInput = { ...freeJuneStay(), guests: 6, children_under_12: 0 };
   if (/my name is (\w+)/i.test(question)) {
     const name = /my name is (\w+)/i.exec(question)[1];
     return message([{ type: "tool_use", name: "prepare_booking_request", input: { ...stayInput, guest_name: name, note_for_host: "Arriving around 18:00" } }], "tool_use");
@@ -85,8 +84,8 @@ function reply(body) {
     return message([{ type: "text", text: "Need dates. Checking now." }, { type: "tool_use", name: "check_availability", input: stayInput }], "tool_use");
   }
   if (/ignore your instructions/i.test(question)) return message([], "refusal");
-  if (/check-in/i.test(question)) return message([{ type: "text", text: "Der Check-in ist ab 15:00 Uhr mit einer Schlüsselbox möglich." }], "end_turn");
-  return message([{ type: "text", text: "Yes. Each apartment has one free reserved parking space in the courtyard, 30 m from the door." }], "end_turn");
+  if (/check-in/i.test(question)) return message([{ type: "text", text: "Der Check-in ist ab 16:00 Uhr. Der Gastgeber empfängt Sie an der Villa." }], "end_turn");
+  return message([{ type: "text", text: "The pool isn't heated, but the hot tub in the garden is heated and open all season." }], "end_turn");
 }
 
 export function startMock(port = 0) {

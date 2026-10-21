@@ -48,8 +48,8 @@ const lastReply = (page) => page.getByTestId("reply").last();
 
 await check("a suggested question gets a streamed answer", async () => {
   const { page, errors } = await open({ width: 1366, height: 900 });
-  await page.getByRole("button", { name: "Is parking included?" }).click();
-  await assert.doesNotReject(lastReply(page).getByText("free reserved parking space").waitFor({ timeout: 10_000 }));
+  await page.getByRole("button", { name: "Is the pool heated?" }).click();
+  await assert.doesNotReject(lastReply(page).getByText("hot tub in the garden is heated").waitFor({ timeout: 10_000 }));
   assert.deepEqual(errors, []);
   await page.close();
 });
@@ -57,7 +57,7 @@ await check("a suggested question gets a streamed answer", async () => {
 await check("dates, then a booking request card with a WhatsApp link", async () => {
   const { page } = await open({ width: 1366, height: 900 });
   const box = page.getByLabel("Your question");
-  await box.fill("Is Mare free in June for 4?");
+  await box.fill("Is the villa free in June for 6?");
   await box.press("Enter");
   await lastReply(page).getByText("Total:").waitFor({ timeout: 10_000 });
   assert.doesNotMatch(await lastReply(page).innerText(), /Need dates/); // thinking aloud before the tool is dropped
@@ -79,7 +79,7 @@ await check("dates, then a booking request card with a WhatsApp link", async () 
 await check("a German question is answered in German", async () => {
   const { page } = await open({ width: 1366, height: 900 });
   await page.getByRole("button", { name: "Wann ist der Check-in?" }).click();
-  await lastReply(page).getByText("Schlüsselbox").waitFor({ timeout: 10_000 });
+  await lastReply(page).getByText("Gastgeber").waitFor({ timeout: 10_000 });
   await page.close();
 });
 
@@ -88,7 +88,7 @@ await check("'Ask about dates' puts the question in the chat box", async () => {
   await page.getByRole("button", { name: "Ask about dates" }).first().click();
   await page.waitForTimeout(600);
   const box = page.getByLabel("Your question");
-  assert.equal(await box.inputValue(), "Is Studio Lanterna free from ");
+  assert.equal(await box.inputValue(), "Is the villa free from ");
   assert.equal(await box.evaluate((element) => element === document.activeElement), true);
   await page.close();
 });

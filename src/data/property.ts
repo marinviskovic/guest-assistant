@@ -1,66 +1,42 @@
 /**
- * Everything the site and the assistant know about the (fictional) property.
+ * Everything the site and the assistant know about the (fictional) villa.
  * The assistant may only answer from this file and from tool results, so any
  * fact a guest might ask about belongs here, not in the prompt.
  */
 
-export type ApartmentId = "studio" | "mare";
 export type Season = "low" | "mid" | "high";
 
-export type Apartment = {
-  id: ApartmentId;
-  name: string;
-  sizeM2: number;
-  maxGuests: number;
-  beds: string;
-  floor: string;
-  outdoor: string;
-  kitchen: string;
-  bathroom: string;
-  petsAllowed: boolean;
-  rates: Record<Season, number>;
-  cleaningFee: number;
-};
-
 export const PROPERTY = {
-  name: "Sea Lantern Apartments",
+  name: "Sea Lantern Villa",
   town: "Rovinj",
   region: "Istria, Croatia",
   timeZone: "Europe/Zagreb",
 };
 
-export const APARTMENTS: Record<ApartmentId, Apartment> = {
-  studio: {
-    id: "studio",
-    name: "Studio Lanterna",
-    sizeM2: 28,
-    maxGuests: 2,
-    beds: "1 double bed (160 cm)",
-    floor: "2nd floor, stairs only (no lift)",
-    outdoor: "small balcony with a partial sea view",
-    kitchen: "kitchenette with two hobs, fridge, kettle and a filter coffee machine (no oven)",
-    bathroom: "shower",
-    petsAllowed: false,
-    rates: { low: 75, mid: 95, high: 125 },
-    cleaningFee: 30,
-  },
-  mare: {
-    id: "mare",
-    name: "Apartment Mare",
-    sizeM2: 55,
-    maxGuests: 4,
-    beds: "bedroom with a double bed (180 cm) and a sofa bed for 2 in the living room",
-    floor: "ground floor, one low step at the entrance",
-    outdoor: "private terrace with a sea view and a table for 4",
-    kitchen: "full kitchen with oven, dishwasher and an espresso machine",
-    bathroom: "walk-in shower and a washing machine",
-    petsAllowed: true,
-    rates: { low: 110, mid: 140, high: 185 },
-    cleaningFee: 45,
-  },
+export const VILLA = {
+  name: PROPERTY.name,
+  maxGuests: 8,
+  bedrooms: 4,
+  bathrooms: 4,
+  rates: { low: 260, mid: 360, high: 490 } as Record<Season, number>,
+  cleaningFee: 150,
+  rooms: [
+    "Three bedrooms with a double bed, each with its own bathroom",
+    "One bedroom with two single beds and its own bathroom, good for children",
+    "Living room and kitchen that open onto the pool terrace",
+    "Covered summer kitchen with a wood-fired grill and a table for 8",
+  ],
+  highlights: [
+    "Private outdoor pool with sun loungers",
+    "Heated hot tub in the garden, with a sea view",
+    "Path down to a small pebble cove",
+    "Wood-fired grill under the covered terrace",
+    "Desk and fast Wi-Fi for remote work",
+    "Free parking for 3 cars inside the gate",
+  ],
 };
 
-/** Season by month (1-12). November to March the house is closed. */
+/** Season by month (1-12). November to March the villa is closed. */
 export const SEASON_BY_MONTH: Record<number, Season | "closed"> = {
   1: "closed", 2: "closed", 3: "closed",
   4: "low", 5: "low",
@@ -78,11 +54,9 @@ export const SEASON_LABELS: Record<Season, string> = {
 };
 
 export const RULES = {
-  minNights: { low: 3, mid: 3, high: 5 } as Record<Season, number>,
+  minNights: { low: 3, mid: 5, high: 7 } as Record<Season, number>,
   /** Tourist tax per guest aged 12 or older, per night, in euros. */
   touristTaxPerNight: 2,
-  /** Per night, Apartment Mare only. */
-  petFeePerNight: 10,
   depositShare: 0.3,
   /** How far ahead the calendar is open, in months. */
   bookingHorizonMonths: 15,
@@ -95,74 +69,76 @@ export const HOUSE_INFO: { title: string; items: string[] }[] = [
   {
     title: "Arrival and departure",
     items: [
-      "Self check-in from 15:00 with a key box at the front door. The key box code is sent on WhatsApp the day before arrival.",
-      "Late arrival is no problem: the key box works at any time after 15:00. Please tell the host your arrival time.",
-      "Early check-in from 12:00 costs €20 and is possible only if the apartment is free the night before. The host confirms it the day before arrival.",
-      "Check-out is by 10:00. Late check-out until 13:00 costs €20 when nobody arrives that day.",
-      "Luggage can be left in the storage room for free between 10:00 and 15:00 on arrival and departure days.",
+      "Check-in is from 16:00. The host meets you at the villa, shows you around and hands over the keys.",
+      "Arriving after 21:00 is fine: the host leaves the keys in a key box by the gate and sends the code on WhatsApp the day before.",
+      "Early check-in from 13:00 costs €60 and is possible only if the villa is free the night before. The host confirms it the day before arrival.",
+      "Check-out is by 10:00. Late check-out until 14:00 costs €60 when nobody arrives that day.",
+    ],
+  },
+  {
+    title: "Pool, hot tub and the sea",
+    items: [
+      "The private outdoor pool is open from 15 May to 15 October. It is not heated.",
+      "There is no lifeguard, so children must be watched at the pool at all times.",
+      "The hot tub in the garden seats 5, is heated and open the whole season, April to October. It looks out over the sea.",
+      "Sun loungers, an outdoor shower and pool towels are provided.",
+      "A path from the garden leads down to a small pebble cove, about 150 m from the villa.",
+      "The beaches of the Golden Cape forest park (Zlatni rt) are 2 km away.",
     ],
   },
   {
     title: "Parking and getting here",
     items: [
-      "Each apartment has one free reserved parking space in the courtyard, 30 m from the door.",
-      "The old town is car-free. A second car can use the paid city car park 400 m away.",
-      "Pula airport is 40 km away, about 45 minutes by car. The host can arrange a private transfer for €60 one way for up to 4 people, booked at least 48 hours ahead.",
-      "The Rovinj bus station is a 700 m walk.",
+      "Free parking for up to 3 cars inside the gate.",
+      "Rovinj old town is 3 km away: about 8 minutes by car or 35 minutes on foot along the coastal path.",
+      "Pula airport is 40 km away, about 45 minutes by car. The host can arrange a minivan transfer for up to 8 people for €90 one way, booked at least 48 hours ahead.",
+      "A car is recommended. The nearest bus stop is 600 m away.",
     ],
   },
   {
-    title: "In the apartments",
+    title: "In the villa",
     items: [
-      "Free fibre Wi-Fi. The network name and password are in the welcome book in the apartment.",
-      "Air conditioning in every room.",
-      "Bed linen, bath towels and beach towels are included. Linen and towels are changed every 7 days on longer stays.",
-      "Hair dryer in both apartments. An iron and ironing board are available on request.",
-      "Apartment Mare has its own washing machine. Studio guests can use the machine in the laundry room for €5 per load.",
-      "A baby cot and high chair are free on request in Apartment Mare. The studio has no room for an extra bed or cot.",
+      "Four bedrooms, each with its own bathroom: three with a double bed and one with two single beds. The villa sleeps up to 8.",
+      "Air conditioning in every bedroom and in the living room.",
+      "Kitchen with an oven, hob, microwave, dishwasher, kettle and filter coffee machine.",
+      "A covered summer kitchen next to the pool has a wood-fired grill and a dining table for 8. Firewood and charcoal are provided.",
+      "Washing machine, iron and ironing board.",
+      "Free fibre Wi-Fi and a desk for remote work. The network name and password are in the welcome book in the villa.",
+      "Bed linen, bath towels and pool towels are included. Linen and towels are changed after 7 nights on longer stays.",
+      "A baby cot and a high chair are free on request.",
     ],
   },
   {
-    title: "Around the house",
+    title: "Around the villa",
     items: [
-      "The nearest swimming spot, with rocks and a concrete platform, is 250 m away. The nearest pebble beach is 1.2 km away.",
-      "The Golden Cape forest park (Zlatni rt) is 1.5 km away on foot or by bike.",
-      "The old town square is a 450 m walk.",
-      "A bakery 150 m away opens at 06:30. A supermarket 300 m away is open 07:00 to 21:00. The nearest pharmacy is 500 m away.",
-      "Two bikes with helmets, two beach chairs and a beach umbrella are free to borrow.",
-    ],
-  },
-  {
-    title: "Pets",
-    items: [
-      "One dog up to 15 kg is welcome in Apartment Mare for €10 per night. Pets are not allowed in the studio.",
-      "Dogs can't be left alone in the apartment and are not allowed on beds or sofas.",
+      "A supermarket and a bakery are 1.2 km away. The supermarket is open 07:00 to 21:00.",
+      "The nearest pharmacy and the restaurants are in Rovinj, 3 km away.",
+      "Four bikes with helmets are free to borrow.",
     ],
   },
   {
     title: "House rules",
     items: [
-      "No smoking inside. Smoking is fine on the balcony or terrace.",
-      "Quiet hours are 22:00 to 07:00. No parties or events.",
-      "Only registered guests can stay overnight, up to the apartment's maximum.",
+      "No pets.",
+      "No smoking inside. Smoking is fine on the terrace and in the garden.",
+      "Quiet hours are 22:00 to 08:00. No parties or events.",
+      "Only registered guests can stay overnight, up to 8 people.",
     ],
   },
   {
     title: "Prices, payment and cancellation",
     items: [
-      "Nightly prices depend on the season and include VAT. A one-off cleaning fee is added per stay.",
+      "Nightly prices are for the whole villa, depend on the season and include VAT. A one-off cleaning fee of €150 is added per stay.",
       "Tourist tax is €2 per night for each guest aged 12 or older. Children under 12 stay free of tourist tax.",
-      "Minimum stay is 5 nights in July and August and 3 nights the rest of the season. The house is closed from November to March.",
+      "Minimum stay is 7 nights in July and August, 5 nights in June and September, and 3 nights in April, May and October. The villa is closed from November to March.",
       "A booking request is not a confirmed booking. The host replies on WhatsApp, usually within a few hours between 08:00 and 21:00.",
       "To confirm, a 30% deposit is paid by bank transfer or card link within 3 days. The rest is paid on arrival in cash or by card.",
+      "A refundable security deposit of €300 is paid in cash on arrival and returned at check-out.",
       "Cancellation is free up to 30 days before arrival and the deposit is refunded. After that the deposit is not refundable.",
     ],
   },
   {
     title: "Contact",
-    items: [
-      "The host answers on WhatsApp every day from 08:00 to 21:00.",
-      "In an emergency call 112.",
-    ],
+    items: ["The host answers on WhatsApp every day from 08:00 to 21:00.", "In an emergency call 112."],
   },
 ];

@@ -1,4 +1,4 @@
-import { APARTMENTS, RULES, SEASON_BY_MONTH, type ApartmentId, type Season } from "../data/property.js";
+import { RULES, SEASON_BY_MONTH, VILLA, type Season } from "../data/property.js";
 
 /**
  * Availability and prices. The assistant never does this maths itself: it calls
@@ -8,12 +8,10 @@ import { APARTMENTS, RULES, SEASON_BY_MONTH, type ApartmentId, type Season } fro
 const DAY = 86_400_000;
 
 export type StayQuery = {
-  apartment: ApartmentId;
   checkIn: string;
   checkOut: string;
   guests: number;
   childrenUnder12: number;
-  pet: boolean;
 };
 
 export type Problem = { code: string; detail: string };
@@ -24,7 +22,6 @@ export type PriceBreakdown = {
   rates: { season: Season; nights: number; rate: number; subtotal: number }[];
   accommodation: number;
   cleaningFee: number;
-  petFee: number;
   touristTax: number;
   total: number;
   deposit: number;
@@ -32,8 +29,6 @@ export type PriceBreakdown = {
 };
 
 export type StayResult = {
-  apartment: ApartmentId;
-  name: string;
   checkIn: string;
   checkOut: string;
   available: boolean;
@@ -53,7 +48,7 @@ export function parseDate(value: string): number | null {
 
 export const formatDate = (time: number) => new Date(time).toISOString().slice(0, 10);
 
-/** Today's date where the apartments are, as "YYYY-MM-DD". */
+/** Today's date where the villa is, as "YYYY-MM-DD". */
 export function todayIn(timeZone: string, now = new Date()): string {
   const parts = Object.fromEntries(
     new Intl.DateTimeFormat("en-CA", { timeZone, year: "numeric", month: "2-digit", day: "2-digit" })
@@ -67,8 +62,8 @@ export const seasonOf = (time: number) => SEASON_BY_MONTH[new Date(time).getUTCM
 
 const round2 = (value: number) => Math.round(value * 100) / 100;
 
-// A believable calendar for any year, the same on every request: each
-// apartment and year seeds its own run of bookings, busier in high season.
+// A believable calendar for any year, the same on every request: each year
+// seeds its own run of bookings, busier in high season and mostly weeks in summer.
 function seededRandom(seed: string) {
   let state = 2166136261;
   for (const char of seed) state = Math.imul(state ^ char.charCodeAt(0), 16777619);
@@ -80,34 +75,33 @@ function seededRandom(seed: string) {
   };
 }
 
-const OCCUPANCY: Record<Season, number> = { low: 0.35, mid: 0.6, high: 0.8 };
-const calendars = new Map<string, Set<string>>();
+const OCCUPANCY: Record<Season, number> = { low: 0.25, mid: 0.4, high: 0.5 };
+const calendars = new Map<number, Set<string>>();
 
-export function bookedNights(apartment: ApartmentId, year: number): Set<string> {
-  const key = `${apartment}:${year}`;
-  const cached = calendars.get(key);
+export function bookedNights(year: number): Set<string> {
+  const cached = calendars.get(year);
   if (cached) return cached;
 
-  const random = seededRandom(key);
+  const random = seededRandom(`villa:${year}`);
   const nights = new Set<string>();
   const end = Date.UTC(year, 10, 1);
   let cursor = Date.UTC(year, 3, 1) + Math.floor(random() * 4) * DAY;
   while (cursor < end) {
     const season = seasonOf(cursor) as Season;
     if (random() < OCCUPANCY[season]) {
-      const length = season === "high" ? 5 + Math.floor(random() * 4) : 3 + Math.floor(random() * 5);
+      const length = season === "high" ? 7 + Math.floor(random() * 2) * 3 : season === "mid" ? 5 + Math.floor(random() * 4) : 3 + Math.floor(random() * 5);
       for (let i = 0; i < length && cursor + i * DAY < end; i++) nights.add(formatDate(cursor + i * DAY));
       cursor += length * DAY;
     } else {
-      cursor += (1 + Math.floor(random() * 3)) * DAY;
+      // Summer gaps are whole weeks, the way villas let in July and August.
+      cursor += (season === "high" ? 7 : 1 + Math.floor(random() * 3)) * DAY;
     }
   }
-  calendars.set(key, nights);
+  calendars.set(year, nights);
   return nights;
 }
 
-export const isBooked = (apartment: ApartmentId, date: string) =>
-  bookedNights(apartment, Number(date.slice(0, 4))).has(date);
+export const isBooked = (date: string) => bookedNights(Number(date.slice(0, 4))).has(date);
 
 function addMonths(time: number, months: number) {
   const date = new Date(time);
@@ -115,7 +109,6 @@ function addMonths(time: number, months: number) {
 }
 
 export function priceFor(query: StayQuery): PriceBreakdown {
-  const apartment = APARTMENTS[query.apartment];
   const start = parseDate(query.checkIn)!;
   const nights = Math.round((parseDate(query.checkOut)! - start) / DAY);
 
@@ -124,22 +117,20 @@ export function priceFor(query: StayQuery): PriceBreakdown {
     const season = seasonOf(start + i * DAY) as Season;
     const last = rates.at(-1);
     if (last?.season === season) last.nights++;
-    else rates.push({ season, nights: 1, rate: apartment.rates[season], subtotal: 0 });
+    else rates.push({ season, nights: 1, rate: VILLA.rates[season], subtotal: 0 });
   }
   for (const line of rates) line.subtotal = line.nights * line.rate;
 
   const accommodation = rates.reduce((sum, line) => sum + line.subtotal, 0);
-  const petFee = query.pet ? RULES.petFeePerNight * nights : 0;
   const touristTax = RULES.touristTaxPerNight * nights * (query.guests - query.childrenUnder12);
-  const total = accommodation + apartment.cleaningFee + petFee + touristTax;
+  const total = accommodation + VILLA.cleaningFee + touristTax;
   const deposit = round2(total * RULES.depositShare);
   return {
     currency: "EUR",
     nights,
     rates,
     accommodation,
-    cleaningFee: apartment.cleaningFee,
-    petFee,
+    cleaningFee: VILLA.cleaningFee,
     touristTax,
     total,
     deposit,
@@ -149,7 +140,6 @@ export function priceFor(query: StayQuery): PriceBreakdown {
 
 /** Everything that stops this stay, apart from nights already booked. */
 function ruleProblems(query: StayQuery, today: string): Problem[] {
-  const apartment = APARTMENTS[query.apartment];
   const start = parseDate(query.checkIn);
   const end = parseDate(query.checkOut);
   if (start === null || end === null) {
@@ -168,7 +158,7 @@ function ruleProblems(query: StayQuery, today: string): Problem[] {
   const nights = Math.round((end - start) / DAY);
   const closed = Array.from({ length: nights }, (_, i) => start + i * DAY).some((night) => seasonOf(night) === "closed");
   if (closed) {
-    problems.push({ code: "closed", detail: "The house is closed from November to March. The season runs from 1 April to 31 October." });
+    problems.push({ code: "closed", detail: "The villa is closed from November to March. The season runs from 1 April to 31 October." });
   } else {
     const minNights = RULES.minNights[seasonOf(start) as Season];
     if (nights < minNights) {
@@ -178,14 +168,11 @@ function ruleProblems(query: StayQuery, today: string): Problem[] {
 
   if (!Number.isInteger(query.guests) || query.guests < 1) {
     problems.push({ code: "guests", detail: "At least one guest is needed." });
-  } else if (query.guests > apartment.maxGuests) {
-    problems.push({ code: "too_many_guests", detail: `${apartment.name} sleeps up to ${apartment.maxGuests}.` });
+  } else if (query.guests > VILLA.maxGuests) {
+    problems.push({ code: "too_many_guests", detail: `The villa sleeps up to ${VILLA.maxGuests}.` });
   }
   if (query.childrenUnder12 < 0 || query.childrenUnder12 >= query.guests) {
     problems.push({ code: "guests", detail: "At least one guest must be 12 or older." });
-  }
-  if (query.pet && !apartment.petsAllowed) {
-    problems.push({ code: "pets_not_allowed", detail: `Pets are not allowed in ${apartment.name}.` });
   }
   return problems;
 }
@@ -193,16 +180,11 @@ function ruleProblems(query: StayQuery, today: string): Problem[] {
 function bookedIn(query: StayQuery): string[] {
   const start = parseDate(query.checkIn)!;
   const nights = Math.round((parseDate(query.checkOut)! - start) / DAY);
-  return Array.from({ length: nights }, (_, i) => formatDate(start + i * DAY)).filter((night) =>
-    isBooked(query.apartment, night),
-  );
+  return Array.from({ length: nights }, (_, i) => formatDate(start + i * DAY)).filter((night) => isBooked(night));
 }
 
 export function checkStay(query: StayQuery, today: string): StayResult {
-  const apartment = APARTMENTS[query.apartment];
   const result: StayResult = {
-    apartment: query.apartment,
-    name: apartment.name,
     checkIn: query.checkIn,
     checkOut: query.checkOut,
     available: false,
