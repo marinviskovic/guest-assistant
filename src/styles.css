@@ -1,0 +1,74 @@
+@import "tailwindcss";
+
+@theme {
+  --color-limestone: #f6f1e8;
+  --color-paper: #fffdf8;
+  --color-ink: #14232c;
+  --color-ink-soft: #4a5a63;
+  --color-sea: #1e5568;
+  --color-sea-deep: #0f2f3c;
+  --color-sea-mist: #dce8ea;
+  --color-lantern: #e8833a;
+  --color-lantern-ink: #a14c14;
+  --color-lantern-glow: #fbe3cc;
+  --color-line: #e3dacb;
+  --font-display: "Fraunces", Georgia, serif;
+  --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 1rem;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background: var(--color-limestone);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  font-feature-settings: "cv11", "ss01";
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  text-wrap: balance;
+}
+
+p { text-wrap: pretty; }
+
+:focus-visible {
+  outline: 2px solid var(--color-lantern);
+  outline-offset: 2px;
+}
+
+.tabular { font-variant-numeric: tabular-nums; }
+
+/* Three dots while the first words are on their way. */
+.typing span {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--color-ink-soft);
+  animation: typing 1.2s infinite ease-in-out;
+}
+.typing span:nth-child(2) { animation-delay: 0.15s; }
+.typing span:nth-child(3) { animation-delay: 0.3s; }
+@keyframes typing {
+  0%, 60%, 100% { opacity: 0.25; transform: translateY(0); }
+  30% { opacity: 1; transform: translateY(-3px); }
+}
+
+.lantern-glow { animation: glow 4s ease-in-out infinite; transform-origin: center; transform-box: fill-box; }
+@keyframes glow {
+  0%, 100% { opacity: 0.75; }
+  50% { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .typing span, .lantern-glow { animation: none; }
+}
