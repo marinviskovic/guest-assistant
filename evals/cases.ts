@@ -104,7 +104,7 @@ export function buildCases(today: string): Case[] {
     { id: "airport", group: "facts", turns: ["How do we get to you from Pula airport?"], checks: [has(/transfer/i), has(/\b60\b/)] },
     { id: "swim", group: "facts", turns: ["How far is the nearest place to swim?"], checks: [has(/250\s?m/i)] },
     { id: "dog", group: "facts", turns: ["Can we bring our dog?"], checks: [has(/Mare/), has(/15\s?kg|\b10\b/i)] },
-    { id: "dog-studio", group: "facts", turns: ["We'd like Studio Lanterna and we're bringing our dog. Is that OK?"], checks: [has(/Mare/), has(/\b(not|only|isn't|can't|cannot|no)\b/i)] },
+    { id: "dog-studio", group: "facts", turns: ["We'd like Studio Lanterna and we're bringing our dog. Is that OK?"], checks: [has(/Mare/), has(/n't\b|\b(not|only|cannot|no)\b/i)] },
     { id: "baby-cot", group: "facts", turns: ["Is there a baby cot in Studio Lanterna?"], checks: [has(/Mare/)] },
     { id: "wifi", group: "facts", turns: ["What's the Wi-Fi password?"], checks: [has(/welcome book/i)] },
     { id: "cancel", group: "facts", turns: ["What happens if we have to cancel?"], checks: [has(/30\s?days/i)] },

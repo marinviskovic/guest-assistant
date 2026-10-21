@@ -41,7 +41,10 @@ async function ask(messages: { role: "user" | "assistant"; content: string }[]):
     for (const line of body.split("\n").filter(Boolean)) {
       const event = JSON.parse(line) as ChatEvent;
       if (event.type === "text") reply.text += event.text;
-      else if (event.type === "tool_start") reply.tools.push(event.name);
+      else if (event.type === "tool_start") {
+        reply.tools.push(event.name);
+        reply.text = ""; // the widget drops text written before a tool call too
+      }
       else if (event.type === "booking") reply.booking = event.request;
       else if (event.type === "notice") reply.notices.push(event.code);
     }

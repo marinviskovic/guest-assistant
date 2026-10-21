@@ -60,6 +60,7 @@ await check("dates, then a booking request card with a WhatsApp link", async () 
   await box.fill("Is Mare free in June for 4?");
   await box.press("Enter");
   await lastReply(page).getByText("Total:").waitFor({ timeout: 10_000 });
+  assert.doesNotMatch(await lastReply(page).innerText(), /Need dates/); // thinking aloud before the tool is dropped
   await box.fill("Please book it, my name is Ana");
   await page.getByRole("button", { name: "Send" }).click();
   const card = page.getByRole("region", { name: "Booking request" });

@@ -80,7 +80,10 @@ function reply(body) {
     const name = /my name is (\w+)/i.exec(question)[1];
     return message([{ type: "tool_use", name: "prepare_booking_request", input: { ...stayInput, guest_name: name, note_for_host: "Arriving around 18:00" } }], "tool_use");
   }
-  if (/free/i.test(question)) return message([{ type: "tool_use", name: "check_availability", input: stayInput }], "tool_use");
+  if (/free/i.test(question)) {
+    // The real model sometimes thinks aloud before a tool call; the widget must not show it.
+    return message([{ type: "text", text: "Need dates. Checking now." }, { type: "tool_use", name: "check_availability", input: stayInput }], "tool_use");
+  }
   if (/ignore your instructions/i.test(question)) return message([], "refusal");
   if (/check-in/i.test(question)) return message([{ type: "text", text: "Der Check-in ist ab 15:00 Uhr mit einer Schlüsselbox möglich." }], "end_turn");
   return message([{ type: "text", text: "Yes. Each apartment has one free reserved parking space in the courtyard, 30 m from the door." }], "end_turn");

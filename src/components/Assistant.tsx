@@ -111,7 +111,7 @@ export function Assistant() {
         toTurns(history),
         (event) => {
           if (event.type === "text") update((m) => ({ ...m, text: m.text + event.text, activity: undefined }));
-          else if (event.type === "tool_start") update((m) => ({ ...m, activity: ACTIVITY[event.name] }));
+          else if (event.type === "tool_start") update((m) => ({ ...m, text: "", activity: ACTIVITY[event.name] }));
           else if (event.type === "booking") update((m) => ({ ...m, booking: event.request }));
           else if (event.type === "notice") {
             update((m) => ({ ...m, notice: event.message, text: event.code === "refusal" ? "" : m.text }));

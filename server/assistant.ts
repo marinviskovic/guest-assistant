@@ -19,7 +19,7 @@ export type ChatTurn = { role: "user" | "assistant"; content: string };
 /** One line of the NDJSON stream the chat widget reads. */
 export type ChatEvent =
   | { type: "text"; text: string }
-  | { type: "tool_start"; name: string }
+  | { type: "tool_start"; name: string } // also replaces any text streamed before it
   | { type: "tool_done"; name: string; input: unknown; output: unknown }
   | { type: "booking"; request: BookingRequest }
   | { type: "notice"; code: "refusal" | "busy" | "offline" | "error" | "limit"; message: string }
@@ -68,7 +68,6 @@ export async function* runAssistant(
 ): AsyncGenerator<ChatEvent> {
   const today = todayIn(PROPERTY.timeZone, options.now);
   const messages: Anthropic.Beta.BetaMessageParam[] = turns.map((turn) => ({ role: turn.role, content: turn.content }));
-  let wroteText = false;
 
   for (let round = 0; round <= MAX_TOOL_ROUNDS; round++) {
     const stream = client.beta.messages.stream(
@@ -88,18 +87,15 @@ export async function* runAssistant(
       { signal: options.signal },
     );
 
-    let startedText = false;
     for await (const event of stream) {
+      // Text written before a tool call is the model thinking aloud; the widget clears it on tool_start.
       if (event.type === "content_block_start" && event.content_block.type === "tool_use") {
         if (TOOL_STATUS_SAFE.has(event.content_block.name)) yield { type: "tool_start", name: event.content_block.name };
       } else if (event.type === "content_block_delta" && event.delta.type === "text_delta") {
-        if (!startedText && wroteText) yield { type: "text", text: "\n\n" };
-        startedText = true;
         yield { type: "text", text: event.delta.text };
       }
     }
     const message = await stream.finalMessage();
-    wroteText ||= startedText;
     console.log(
       JSON.stringify({
         event: "usage",

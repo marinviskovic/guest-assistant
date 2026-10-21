@@ -60,6 +60,8 @@ test("the API request uses the cached prompt, low effort and server-side fallbac
 test("a dates question runs the calendar tool and answers with its price", async () => {
   const list = await events(await ask([{ role: "user", content: "Is Mare free in June for 4?" }]));
   assert.deepEqual(list.filter((event) => event.type === "tool_start").map((event) => (event as { name: string }).name), ["check_availability"]);
+  // Text written before the tool call comes first, so the widget can replace it when the tool starts.
+  assert.ok(list.findIndex((event) => event.type === "text") < list.findIndex((event) => event.type === "tool_start"));
   const done = list.find((event) => event.type === "tool_done") as Extract<ChatEvent, { type: "tool_done" }>;
   const output = done.output as { results: { available: boolean; price: { total: number } }[] };
   assert.equal(output.results[0].available, true);
