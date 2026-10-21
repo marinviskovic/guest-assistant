@@ -1,6 +1,6 @@
 # Sea Lantern, an AI guest assistant for holiday apartments (concept)
 
-**Live:** link added after the first deploy
+**Live:** https://sea-lantern-rovinj.vercel.app
 
 A website for two holiday apartments in Rovinj, Croatia, with a chat assistant that answers guests the way the host
 would: check-in times, parking, the nearest beach, the dog rules, free dates and prices. It answers in the guest's
