@@ -41,6 +41,15 @@ browser  ──POST /api/chat──▶  api/chat.ts (Vercel function)  ──▶
   realistic free and booked nights without a database.
 - The API key lives only in the Vercel function's environment. The browser bundle contains no SDK, prompt or key.
 
+## Results on the live site
+
+- `npm run eval`: 30/30 graded questions pass on https://sea-lantern-rovinj.vercel.app (run on 21 October 2026).
+  The first run scored 29/30. The one miss was a check that didn't accept "aren't", and reading every reply showed
+  one where the model's note to itself appeared before a calendar check. Both are fixed: the widget now drops text
+  written before a tool call.
+- Lighthouse, mobile: performance 99, accessibility 100, best practices 100, SEO 100 (median of 3 runs). Desktop: 100
+  in every category.
+
 ## Tests
 
 ```bash
