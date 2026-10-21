@@ -176,7 +176,7 @@ export function buildCases(today: string): Case[] {
       id: "booking-needs-name",
       group: "booking",
       turns: [`Please book the villa ${range(june)} for 4 adults.`],
-      checks: [noBooking, has(/name/i)],
+      checks: [noBooking, has(/name/i), never(/^\s*Need\b|in one (short )?question/i)],
     },
   ];
 }
